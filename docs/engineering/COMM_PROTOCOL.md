@@ -55,6 +55,7 @@ Rules:
 - incompatible protocol versions must be surfaced as gateway-visible faults
 - Phase 1 should begin with protocol version `1`
 - version is checked before the gateway trusts detailed payload fields
+- `message_type` should mirror the originating command ID in Phase 1 responses
 
 ## I2C Framing Model
 
@@ -83,7 +84,7 @@ Suggested response header:
 Guidelines:
 
 - avoid variable-length lists unless the upper bound is part of the command definition
-- keep all multi-byte fields endianness-defined in implementation docs later
+- encode all multi-byte integer fields as little-endian on the wire
 - reject payloads that do not match the expected fixed size for a command
 
 ## I2C Command Set
@@ -102,7 +103,9 @@ Request payload:
 
 Response payload:
 
-- optional tile-local reset status flags
+| Field | Size | Meaning |
+| --- | --- | --- |
+| `reset_flags` | 2 bytes | Cache cleared and address-release result bits |
 
 Expected result:
 
@@ -164,6 +167,7 @@ Notes:
 - tile may complete probing before the response or mark itself busy and complete shortly after
 - Phase 1 should prefer bounded local probing time instead of indefinite retry loops
 - without this command, a tile should remain idle and should not start a fresh neighbor scan on its own
+- the normal acknowledgement payload length is `0`
 
 ### `0x05` GET_SCAN_STATUS
 
@@ -247,14 +251,15 @@ Suggested per-edge payload:
 | `direction` | 1 byte | `N/E/S/W` |
 | `edge_state` | 1 byte | Open, confirmed, timeout, etc. |
 | `neighbor_uid` | 8 bytes | Valid only when confirmed |
+| `signal_quality` | 1 byte | Optional simple confidence or link-quality byte |
 | `edge_error_flags` | 1 byte | Edge-local anomalies |
-| `reserved` | 1 byte | Reserved for future proofing |
 
 Guidelines:
 
 - keep it fixed-size even when no neighbor exists
 - use `neighbor_uid = 0` when the edge is not confirmed
 - do not include variable-length diagnostics in Phase 1
+- the fixed per-edge payload size is `12` bytes
 
 ## Directional Edge Handshake Contract
 

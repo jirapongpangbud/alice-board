@@ -10,13 +10,13 @@ Implemented so far:
 - engineering architecture and protocol documents
 - product scope and PRD
 - process decisions and work breakdown
+- shared protocol header with fixed-size Phase 1 wire records
 - placeholder directories for future firmware, shared protocol, tests, and hardware work
 
 Not implemented yet:
 
 - gateway firmware
 - tile firmware
-- shared protocol code
 - simulation harness
 - hardware test fixtures
 - board-level validation scripts
@@ -55,6 +55,7 @@ Primary references:
 - `docs/product/SCOPE.md`
 - `docs/process/DECISIONS.md`
 - `docs/process/WORK_BREAKDOWN.md`
+- `shared/protocol/alice_protocol.h`
 
 ## Important Behavioral Rules
 
@@ -87,4 +88,4 @@ Primary references:
 
 Progress is currently at the point where the project has a clear specification and directory structure, but no executable firmware or tests.
 
-The next work should focus on locking the implementation-facing contract, not on adding product features.
+The protocol-facing implementation contract now exists. The next work should focus on the first executable firmware skeletons, not on adding product features.

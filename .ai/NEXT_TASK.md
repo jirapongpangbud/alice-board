@@ -2,54 +2,60 @@
 
 ## Immediate Goal
 
-Start the first implementation-facing work for `Phase 1` without writing full firmware yet.
+Start the first executable firmware-facing work for `Phase 1` on the tile side.
 
-The next task should define the shared protocol contract in a way that both `gateway` and `tile` firmware can implement consistently.
+The next task should implement the tile scan-state machine skeleton against the shared protocol contract.
 
 ## Recommended Next Task
 
-Create the initial shared protocol specification package under `shared/protocol` as code-ready definitions.
+Create the initial tile firmware skeleton under `firmware/tile` with explicit state handling for discovery.
 
 Scope of this task:
 
-- define command IDs
-- define protocol version constant
-- define status codes
-- define `Direction` enum
-- define `EdgeState` enum
-- define fixed-size wire-level record layouts
-- define explicit scan states such as `idle`, `awaiting_probe`, `probing`, `ready`, `fault`
-- define compile-time limits like maximum neighbors and fixed report sizes
+- define tile-local state struct for the active scan
+- implement command handler skeletons for:
+  - `RESET_SCAN_STATE`
+  - `CLAIM_RUNTIME_ADDRESS`
+  - `GET_TILE_IDENTITY`
+  - `START_EDGE_PROBE`
+  - `GET_SCAN_STATUS`
+  - `GET_NEIGHBOR_REPORT`
+  - `PING`
+- keep edge probing as a stub or mockable function boundary
+- populate fixed-size response records from `shared/protocol/alice_protocol.h`
+- keep the implementation transport-agnostic where practical
+- avoid real hardware driver code if it would force premature design decisions
 
-This task should not implement transport drivers or business logic yet. It should only lock the shared contract.
+This task should not implement gameplay, topology reconciliation, or full hardware drivers yet. It should only establish a safe executable tile-side skeleton.
 
 ## Why This Task Comes Next
 
 It is the narrowest high-value step after documentation:
 
-- both firmware sides depend on the same constants and message shapes
-- test harnesses also depend on these definitions
-- it reduces drift between docs and implementation
-- it keeps Phase 1 focused on bounded interfaces first
+- it proves the shared contract is usable in real code
+- it locks the command-driven scan lifecycle on the tile side
+- it gives the gateway team a concrete responder model to target
+- it creates a clean seam for later simulation and hardware bring-up
 
 ## Expected Deliverables
 
-- shared protocol header or equivalent definition files in `shared/protocol`
-- a short `README` update in that directory if needed
-- explicit mapping from documented protocol to code-level constants
+- tile protocol handler skeleton in `firmware/tile`
+- explicit scan-state transitions
+- fixed-size response builders using the shared protocol header
+- directory `README` update if implementation layout needs explanation
 - no dynamic memory
-- no firmware task scheduling
-- no hardware driver implementation yet
+- no gameplay logic
+- no full hardware driver implementation yet
 
 ## Acceptance Criteria
 
 The next task is complete when:
 
-- gateway and tile teams can refer to one shared source of truth for protocol constants
-- every documented Phase 1 command has a code-level identifier
-- response status codes are fixed and unambiguous
-- all wire-level records are bounded and fixed-size
-- the shared definitions still match `docs/engineering/COMM_PROTOCOL.md` and `docs/engineering/DB_SCHEMA.md`
+- tile code can accept every documented Phase 1 command
+- scan-state transitions are explicit and bounded
+- tile never starts edge scans without `START_EDGE_PROBE`
+- all responses use fixed-size shared protocol structs
+- the implementation still matches `docs/engineering/COMM_PROTOCOL.md` and `docs/engineering/ARCHITECTURE.md`
 
 ## After This Task
 
@@ -66,8 +72,8 @@ Once shared protocol definitions are in place, the recommended order is:
 - do not add networking
 - do not add OTA or configuration systems
 - do not let tiles initiate discovery on their own
-- do not use unbounded or heap-dependent structures in tile-facing definitions
+- do not use unbounded or heap-dependent structures
 
 ## Notes For Whoever Picks This Up
 
-If the shared protocol task reveals ambiguity, resolve it in the docs first or in the same change set. Do not let code silently redefine the protocol.
+If tile implementation reveals ambiguity in state transitions or payload meaning, resolve it in the docs and shared header in the same change set. Do not let code silently redefine the protocol.
