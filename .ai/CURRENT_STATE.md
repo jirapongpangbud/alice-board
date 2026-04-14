@@ -11,12 +11,12 @@ Implemented so far:
 - product scope and PRD
 - process decisions and work breakdown
 - shared protocol header with fixed-size Phase 1 wire records
-- placeholder directories for future firmware, shared protocol, tests, and hardware work
+- initial tile firmware skeleton with command handlers and scan-state transitions
 
 Not implemented yet:
 
 - gateway firmware
-- tile firmware
+- real tile transport and edge-link drivers
 - simulation harness
 - hardware test fixtures
 - board-level validation scripts
@@ -56,6 +56,8 @@ Primary references:
 - `docs/process/DECISIONS.md`
 - `docs/process/WORK_BREAKDOWN.md`
 - `shared/protocol/alice_protocol.h`
+- `firmware/tile/include/alice_tile.h`
+- `firmware/tile/src/alice_tile.c`
 
 ## Important Behavioral Rules
 
@@ -86,6 +88,6 @@ Primary references:
 
 ## Definition of "Current Progress"
 
-Progress is currently at the point where the project has a clear specification and directory structure, but no executable firmware or tests.
+Progress is currently at the point where the project has a clear specification, a shared protocol contract, and the first executable tile-side firmware skeleton, but no gateway orchestration or test harness yet.
 
-The protocol-facing implementation contract now exists. The next work should focus on the first executable firmware skeletons, not on adding product features.
+The next work should focus on the gateway-side orchestration skeleton and the first simulation fixtures, not on adding product features.
