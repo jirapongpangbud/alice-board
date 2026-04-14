@@ -2,68 +2,67 @@
 
 ## Immediate Goal
 
-Start the first executable firmware-facing work for `Phase 1` on the gateway side.
+Start the first executable testing-facing work for `Phase 1` using the tile and gateway skeletons together.
 
-The next task should implement the gateway discovery orchestration skeleton against the shared protocol contract and the tile skeleton.
+The next task should build the first simulation harness and protocol-level discovery tests.
 
 ## Recommended Next Task
 
-Create the initial gateway discovery skeleton under `firmware/gateway` with explicit scan lifecycle handling.
+Create a simulation test harness under `tests/simulation` that can drive the gateway skeleton against one or more tile skeleton instances.
 
 Scope of this task:
 
-- define gateway-local discovery session state
-- implement the high-level scan lifecycle:
-  - start scan generation
-  - reset tile scan state
-  - coordinate runtime address claim
-  - trigger edge probing
-  - poll scan status
-  - collect neighbor reports
-- store tile observations in bounded gateway-side records
-- keep transport calls behind a narrow mockable boundary
-- avoid full topology reconciliation and coordinate derivation if that would make the first gateway slice too large
+- implement a mock transport adapter that translates gateway requests into tile command calls
+- support controlled claim-address behavior for multiple simulated tiles
+- add deterministic discovery scenarios:
+  - single tile
+  - two connected tiles
+  - scan with no tiles
+- add fault-oriented scenarios where practical:
+  - duplicate UID
+  - tile stays busy
+  - transport failure on one tile
+- verify snapshot contents, phase completion, and fault counting
 
-This task should not implement gameplay, real hardware drivers, or final graph reconciliation yet. It should only establish a safe executable gateway-side orchestration skeleton.
+This task should not implement real hardware drivers or final graph reconciliation yet. It should prove that the current protocol and command sequencing work end to end in simulation.
 
 ## Why This Task Comes Next
 
 It is the narrowest high-value step after documentation:
 
-- it proves the shared contract works end to end against the tile skeleton
-- it locks the gateway-owned scan sequence early
-- it creates the execution path needed for simulation fixtures
-- it prepares the repo for the first `1 gateway + 2 tiles` bring-up
+- it validates the gateway and tile skeletons against each other
+- it exposes protocol and state-machine mismatches early
+- it provides repeatable regression tests before board bring-up
+- it reduces hardware debugging load by catching logic errors off-target first
 
 ## Expected Deliverables
 
-- gateway discovery state and command sequencing skeleton in `firmware/gateway`
-- explicit scan-session lifecycle
-- bounded storage for per-tile observations
-- mockable transport interface for tile command exchange
+- simulation harness code in `tests/simulation`
+- at least a small set of executable discovery tests
+- documented expected scenarios and assertions
 - directory `README` update if implementation layout needs explanation
 - no dynamic memory
 - no gameplay logic
-- no full hardware driver implementation yet
+- no real hardware driver implementation yet
 
 ## Acceptance Criteria
 
 The next task is complete when:
 
-- gateway code can execute the documented Phase 1 command sequence
-- scan-session state is explicit and bounded
-- tile interactions go through the shared protocol structs
-- the design can be driven by mocks in simulation
+- the gateway skeleton can run against simulated tiles
+- discovery succeeds for simple deterministic layouts
+- at least one fault scenario is exercised and asserted
+- the test harness uses the same shared protocol contract as firmware code
 - the implementation still matches `docs/engineering/COMM_PROTOCOL.md` and `docs/engineering/ARCHITECTURE.md`
 
 ## After This Task
 
 Once shared protocol definitions are in place, the recommended order is:
 
-1. implement gateway discovery orchestration skeleton
-2. build simulation fixtures for protocol and topology cases
-3. implement graph reconciliation and coordinate derivation
-4. bring up the first real-board test with `1 gateway + 2 tiles`
+1. build simulation fixtures for protocol and topology cases
+2. implement graph reconciliation and coordinate derivation
+3. bring up the first real-board test with `1 gateway + 2 tiles`
+4. expand fault coverage and timing validation
 
 ## Constraints For The Next Task
 
@@ -75,4 +74,4 @@ Once shared protocol definitions are in place, the recommended order is:
 
 ## Notes For Whoever Picks This Up
 
-If gateway implementation reveals ambiguity in scan ordering or response handling, resolve it in the docs and shared header in the same change set. Do not let code silently redefine the protocol.
+If simulation exposes ambiguity in command order, payload meaning, or fault handling, resolve it in the docs and shared header in the same change set. Do not let tests silently normalize broken behavior.
